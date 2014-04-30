@@ -86,6 +86,16 @@ var joinAnonymous = function(event) {
   wsClient.sendMessage(loginlog);
 };
 
+var textChanged = function(event, disableBtn){
+  if (event.explicitOriginalTarget.textLength == 0 && 
+    disableBtn.disabled == false) {
+    disableBtn.disabled = true;
+  } else if (event.explicitOriginalTarget.textLength > 0 && 
+    disableBtn.disabled == true) {
+    disableBtn.disabled = false;
+  }
+};
+
 var entryPoint = function() {
   var host = 'ws://' + window.location.host;
   var sendBtn = document.getElementById('send_button');
@@ -94,6 +104,10 @@ var entryPoint = function() {
   loginBtn.addEventListener('click', loginBtnClick, false);
   var logoutBtn = document.getElementById('logout_button');
   logoutBtn.addEventListener('click', logoutBtnClick, false);
+  var inputTextAria = document.getElementById('input_text');
+  inputTextAria.addEventListener('input', function(event) {
+      textChanged(event, sendBtn);
+  }, false);
   wsClient.init(host, {
      open: joinAnonymous
     ,message: changeView
