@@ -67,16 +67,18 @@ var closeWs = function() {
 
 var changeView = function(msg) {
   msg = JSON.parse(msg.data);
-  if (msg.type == 'message') {
-    msg = msg.speakername + ':' + msg.data;
+  if(msg.roomname == wsClient.roomname) {
+    if (msg.type == 'message') {
+      msg = msg.speakername + ':' + msg.data;
+    }
+    if (msg.type == 'systemlog') {
+      msg = 'System:' + msg.data;
+    }
+    var addElement = document.createElement('div');
+    addElement.appendChild(document.createTextNode(msg));
+    var outputChatLog = document.getElementById('chatlog');
+    outputChatLog.insertBefore(addElement, outputChatLog.firstChild);
   }
-  if (msg.type == 'systemlog') {
-    msg = 'System:' + msg.data;
-  }
-  var addElement = document.createElement('div');
-  addElement.appendChild(document.createTextNode(msg));
-  var outputChatLog = document.getElementById('chatlog');
-  outputChatLog.insertBefore(addElement, outputChatLog.firstChild);
 };
 
 var joinAnonymous = function(event) {
