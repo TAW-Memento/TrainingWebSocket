@@ -7,6 +7,7 @@ var wsClient = {
   ws: null,
   loginusername: 'Anonymous',
   roomname: 'default',
+  prevroomname: 'default',
   init: function(url, handlers) {
     handlers = handlers || {};
     this.ws = new WebSocket(url);
@@ -26,6 +27,7 @@ var wsClient = {
       ,type: msg.type
       ,speakername: this.loginusername
       ,roomname: this.roomname
+      ,prevroomname: this.prevroomname
     };
     this.ws.send(JSON.stringify(sendContents));
   }
@@ -67,6 +69,7 @@ var closeWs = function() {
 
 var changeView = function(msg) {
   msg = JSON.parse(msg.data);
+  console.log(msg);
   if (msg.type == 'message') {
     msg = msg.speakername + ':' + msg.data;
   }
@@ -93,12 +96,14 @@ var roominBtnClick = function() {
     alert('Please input room name!');
     return;
   }
+  wsClient.prevroomname = wsClient.roomname;
   wsClient.roomname = inputroomname.value;
   wsClient.sendMessage({
      data: wsClient.loginusername + ' login'
     ,type: 'systemlog'
   });
   changeRoomNameOutput();
+  wsClient.prevroomname = inputroomname.value;
 };
 
 var changeRoomNameOutput = function() {

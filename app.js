@@ -24,20 +24,63 @@ var wsserver = new WebSocketServer( {
 });
 
 var conns = [];
-wsserver.on('connection', function(ws) {
-  conns.push({
-     socket: ws
+
+conns.push({
+     socket: []
     ,roomname: 'default'
-  });
+});
+
+wsserver.on('connection', function(ws) {
+  for (var conn in conns) {
+    if(conns[conn].roomname == 'default') {
+      conns[conn].socket.push(ws);
+      break;
+    }
+  }
   ws.on('message', function(message) {
+    var jsonMessage = JSON.parse(message);
+    var isExistRoom = false;
+    conns.forEach(function(conn) {
+      if(conn.roomname == jsonMessage.roomname) {
+        isExistRoom = true;
+      }
+    });
+    console.log('¥n');
+    conns.forEach(function(debug) {
+        console.log(debug.roomname);
+        
+    });
+    console.log('¥n');
+    if(ws.prevroomname != ws.roomname){
+      //部屋がなかった場合にconnsへ追加する。
+      if (!isExistRoom) {
+        conns.push({
+         socket: [ws]
+        ,roomname: jsonMessage.roomname
+        });
+      }
+      for(var conn in conns) {
+        if(conns[conn].roomname == jsonMessage.prevroomname) {
+          conns[conn].socket.splice(conns[conn].socket.indexOf(ws), 1);
+          console.log('socket in room die!');
+          if(conns[conn].roomname != 'default' && 
+             conns[conn].socket.length == 0) {
+              conns.splice(conns[conn].roomname.indexOf(jsonMessage.prevroomname), 1);
+              console.log('room erase!');
+          }
+        }
+      }
+    }
+    
     conns.forEach(function(conn) {
       try {
-        var jsonMessage = JSON.parse(message);
-        if (conn.socket === ws && conn.roomname != jsonMessage.roomname) {
-          conn.roomname = jsonMessage.roomname;
-        }
+        console.log(conn.roomname);
+        console.log(jsonMessage.roomname);
         if (conn.roomname == jsonMessage.roomname) {
-          conn.socket.send(message);
+          for (var soc in conn.socket) {
+            conn.socket[soc].send(message);
+            console.log('send ok!');
+          }
         }
       } catch(e) {
       }
